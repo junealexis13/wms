@@ -2,83 +2,81 @@ import time
 import board
 import busio
 import os
-import gpiozero
-
+import subprocess
 from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1306
+from temp_module import TemperatureModule  # import your DS18B20 reader class
 
-import subprocess
-
-# Use gpiozero to control the reset pin
-# oled_reset_pin = gpiozero.OutputDevice(17, active_high=False)  # GPIO 4 for reset, active low
-
+# ──────────────────────────────────────────────
 # Display Parameters
 WIDTH = 128
 HEIGHT = 64
-BORDER = 5
+LOOPTIME = 1.0  # seconds
+# ──────────────────────────────────────────────
 
-# Display Refresh
-LOOPTIME = 1.0
-
-# Use I2C for communication
+# I2C setup
 i2c = board.I2C()
 
-# # Manually reset the display (high -> low -> high for reset pulse)
-# oled_reset_pin.on()
-# time.sleep(0.1)  # Delay for a brief moment
-# oled_reset_pin.off()  # Toggle reset pin low
-# time.sleep(0.1)  # Wait for reset
-# oled_reset_pin.on()  # Turn reset pin back high
-
-# Create the OLED display object
+# OLED object
 oled = adafruit_ssd1306.SSD1306_I2C(WIDTH, HEIGHT, i2c, addr=0x3C)
 
-# Clear the display
+# Clear display
 oled.fill(0)
 oled.show()
 
-# Create a blank image for drawing
+# Create drawing canvas
 image = Image.new("1", (oled.width, oled.height))
-
-# Get drawing object to draw on image
 draw = ImageDraw.Draw(image)
 
-# Draw a white background
-draw.rectangle((0, 0, oled.width, oled.height), outline=255, fill=255)
+# Load custom font
+font = ImageFont.truetype(os.path.join("resources", "fonts", "PixelOperator.ttf"), 14)
 
-font = ImageFont.truetype(os.path.join('resources','fonts','PixelOperator.ttf'), 16)
+# Temperature module (DS18B20)
+temp_sensor = TemperatureModule()
+
+# ──────────────────────────────────────────────
+# Example functions for pH and NH3 placeholders
+# Replace these later with your Arduino serial reads
+# ──────────────────────────────────────────────
+def read_ph():
+    # Placeholder — replace with actual pH sensor read
+    return 7.25
+
+def read_nh3():
+    # Placeholder — replace with actual NH3 sensor read
+    return 0.15  # e.g., ppm
+# ──────────────────────────────────────────────
 
 while True:
-    # Draw a black filled box to clear the image
+    # Clear screen
     draw.rectangle((0, 0, oled.width, oled.height), outline=0, fill=0)
 
-    # Shell scripts for system monitoring from here : https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
-    cmd = "hostname -I | cut -d\' \' -f1"
-    IP = subprocess.check_output(cmd, shell=True)
-    cmd = "top -bn1 | grep load | awk '{printf \"CPU: %.2f\", $(NF-2)}'"
-    CPU = subprocess.check_output(cmd, shell=True)
-    cmd = "free -m | awk 'NR==2{printf \"%.1f %.1f %.1f\", $3/1024,$2/1024,($3/$2)*100}'"
-    MemUsage = subprocess.check_output(cmd, shell=True)
-    mem_parts = MemUsage.decode('utf-8').strip().split()
-    mem_used_gb = mem_parts[0]
-    mem_total_gb = mem_parts[1]
-    mem_percent = mem_parts[2]
-    mem_display = f"Mem: {mem_used_gb}/{mem_total_gb}GB {mem_percent}%"
-    cmd = "df -h | awk '$NF==\"/\"{printf \"Disk: %d/%dGB %s\", $3,$2,$5}'"
-    Disk = subprocess.check_output(cmd, shell=True)
-    cmd = "vcgencmd measure_temp |cut -f 2 -d '='"
-    Temp = subprocess.check_output(cmd, shell=True)
+    # Header
+    draw.text((0, 0), "ARDUINO-WMS v0.2", font=font, fill=255)
 
-    # Pi Stats Display
-    draw.text((0, 0), "IP: " + str(IP, 'utf-8'), font=font, fill=255)
-    draw.text((0, 16), str(CPU, 'utf-8') + "LA", font=font, fill=255)
-    draw.text((80, 16), str(Temp, 'utf-8'), font=font, fill=255)
-    draw.text((0, 32), mem_display, font=font, fill=255)
-    draw.text((0, 48), str(Disk, 'utf-8'), font=font, fill=255)
+    # System stats (optional)
+    try:
+        cmd_ip = "hostname -I | cut -d' ' -f1"
+        IP = subprocess.check_output(cmd_ip, shell=True).decode("utf-8").strip()
+    except subprocess.CalledProcessError:
+        IP = "No IP"
 
-    # Display the image
+    # Sensor readings
+    temperature = temp_sensor.fetch_temp()
+    if temperature is None:
+        temperature = 0.0
+
+    ph_value = read_ph()
+    nh3_value = read_nh3()
+
+    # Display section
+    draw.text((0, 16), f"IP: {IP}", font=font, fill=255)
+    draw.text((0, 30), f"Temp: {temperature:.2f} °C", font=font, fill=255)
+    draw.text((0, 44), f"pH:   {ph_value:.2f}", font=font, fill=255)
+    draw.text((70, 44), f"NH₃: {nh3_value:.2f}", font=font, fill=255)
+
+    # Show updated image
     oled.image(image)
     oled.show()
 
-    # Wait for the next loop
     time.sleep(LOOPTIME)
