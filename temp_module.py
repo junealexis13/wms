@@ -20,7 +20,6 @@ class TemperatureModule:
             # Check if there's output
             if result.stdout.strip():
                 temp_c = float(result.stdout.strip()) / 1000.0
-                print(f"Temperature: {temp_c:.2f} °C")
                 return temp_c
             else:
                 print("No temperature data received.")

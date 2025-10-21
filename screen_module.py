@@ -6,6 +6,7 @@ import subprocess
 from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1306
 from temp_module import TemperatureModule  # import your DS18B20 reader class
+from nh3_module import fetch_ammonio_from_analog
 
 # ──────────────────────────────────────────────
 # Display Parameters
@@ -42,9 +43,6 @@ def read_ph():
     # Placeholder — replace with actual pH sensor read
     return 7.25
 
-def read_nh3():
-    # Placeholder — replace with actual NH3 sensor read
-    return 0.15  # e.g., ppm
 # ──────────────────────────────────────────────
 
 while True:
@@ -67,13 +65,13 @@ while True:
         temperature = 0.0
 
     ph_value = read_ph()
-    nh3_value = read_nh3()
+    nh3_value, nh3_voltage = fetch_ammonio_from_analog()
 
     # Display section
-    draw.text((0, 16), f"IP: {IP}", font=font, fill=255)
+    draw.text((0, 16), f"NH3: {nh3_value:.2f} | Sensor V{nh3_voltage:.2f}", font=font, fill=255)
     draw.text((0, 30), f"Temp: {temperature:.2f} °C", font=font, fill=255)
     draw.text((0, 44), f"pH:   {ph_value:.2f}", font=font, fill=255)
-    draw.text((70, 44), f"NH₃: {nh3_value:.2f}", font=font, fill=255)
+
 
     # Show updated image
     oled.image(image)
