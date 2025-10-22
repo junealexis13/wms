@@ -1,5 +1,6 @@
 import time
 import board
+import statistics
 import math
 from adafruit_ads1x15 import ADS1115, ads1x15, AnalogIn
 from tqdm import tqdm
@@ -14,9 +15,28 @@ def fetch_ph_from_analog():
 
 def voltage_to_ph():
     vout = fetch_ph_from_analog()
-    V_neutral = 2.5   # should still be validated for pH 7
-    V_acid = 3.0      # should be pH 4 
-    return 7 - ((vout - V_neutral) * (7 - 4) / (V_neutral - V_acid))
+
+    # Calibrated voltages at known pH values
+    V_acid = 3.8872  # pH 4
+    V_neutral = 3.67 # pH 7
+    V_base = 3.147   # pH 10
+
+    x_vals = [V_acid, V_neutral, V_base]
+    y_vals = [4.0, 7.0, 10.0]
+
+    # Compute slope (m) and intercept (b) using linear regression
+    n = len(x_vals)
+    sum_x = sum(x_vals)
+    sum_y = sum(y_vals)
+    sum_xy = sum(x*y for x, y in zip(x_vals, y_vals))
+    sum_x2 = sum(x*x for x in x_vals)
+
+    m = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x**2)
+    b = (sum_y - m * sum_x) / n
+
+    ph_value = m * vout + b
+    return max(min(ph_value, 14), 0)
+
 
 def calibrate():
     # start
@@ -63,7 +83,7 @@ def calibrate():
         rd.write('Calibration Report\n')
         rd.write('Using Analytical Grade pH calibration stds.\n')
         rd.write('--------------------------------\n')
-        rd.write(f'pH4 - Avg Voltage Readings: {statistics.mean(ph4a)}\n')
+        rd.write(f'pH4 - Avg Voltage Readings: {statistics.mean(ph4)}\n')
         rd.write(f'pH7 - Avg Voltage Readings: {statistics.mean(ph7)}\n')
         rd.write(f'pH10 - Avg Voltage Readings: {statistics.mean(ph10)}\n')
         rd.write('--------------------------------\n')
