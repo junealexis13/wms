@@ -6,7 +6,7 @@ import subprocess
 from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1306
 from temp_module import TemperatureModule  # import your DS18B20 reader class
-from nh3_module import calculate_nh3_from_analog
+from nh3_module import calculate_nh3_from_analog, fetch_ammonia_from_analog
 
 # ──────────────────────────────────────────────
 # Display Parameters
@@ -65,9 +65,9 @@ while True:
         temperature = 0.0
 
     ph_value = read_ph()
-    nh3_value, rs, ratio = calculate_nh3_from_analog()
+    nh3_value, rs, ratio = calculate_nh3_from_analog(fetch_ammonia_from_analog())
 
-    # Display section
+    # Display sections
     draw.text((0, 16), f"NH3: {nh3_value:.2f} | Sensor Rs{rs:.2f}", font=font, fill=255)
     draw.text((0, 30), f"Temp: {temperature:.2f} °C", font=font, fill=255)
     draw.text((0, 44), f"pH:   {ph_value:.2f}", font=font, fill=255)
