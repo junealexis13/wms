@@ -78,6 +78,6 @@ while True:
     print(f"[{datetime.datetime.now()}] pH {ph_value:.2f} | NH3 {nh3_value:.2f} ppm | Temp {temperature:.2f} °C")
 
     with open('logging.log', 'a') as rd:
-        rd.write(f"[{datetime.datetime.now()}] pH {ph_value:.2f} | NH3 {nh3_value:.2f} ppm | Temp {temperature:.2f} °C")
+        rd.write(f"[{datetime.datetime.now()}] pH {ph_value:.2f} | NH3 {nh3_value:.2f} ppm | Temp {temperature:.2f} °C\n")
         rd.close()
     time.sleep(LOOPTIME)
