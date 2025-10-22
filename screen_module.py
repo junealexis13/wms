@@ -57,7 +57,9 @@ while True:
     if temperature is None:
         temperature = 0.0
 
+    time.sleep(0.5)
     ph_value = voltage_to_ph()
+    time.sleep(0.5) # added delay
     nh3_value, rs, ratio = calculate_nh3_from_analog(fetch_ammonia_from_analog())
 
     # Display sections
