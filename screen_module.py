@@ -46,7 +46,7 @@ while True:
     draw.rectangle((0, 0, oled.width, oled.height), outline=0, fill=0)
 
     # Header
-    draw.text((0, 0), "ARDUINO-WMS v0.2", font=font, fill=255)
+    draw.text((0, 0), "RASPI-WMS v0.4", font=font, fill=255)
 
     # System stats (optional)
     try:
