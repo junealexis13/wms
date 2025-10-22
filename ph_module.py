@@ -22,4 +22,5 @@ def voltage_to_ph():
 if __name__ == "__main__":
     while True:
         pH = voltage_to_ph()
-        print(pH)
+
+        print(f"pH: {pH}")
