@@ -1,17 +1,15 @@
 import time
 import board
 import math
+from ads_instance import get_ads
 from adafruit_ads1x15 import ADS1115, ads1x15, AnalogIn
 
-def fetch_ammonia_from_analog():
+def fetch_ammonia_from_analog(ads_instance):
     """Reads analog voltage from MQ137 via ADS1115."""
-    i2c = board.I2C()
-    ads = ADS1115(i2c)
-    ads.gain = 1  # Gain = 1 => ±4.096V range
-    chan = AnalogIn(ads, ads1x15.Pin.A1)
+    chan = AnalogIn(ads_instance, ads1x15.Pin.A1)
     return chan.voltage
 
-def calculate_nh3_from_analog(vout, vcc=5.0, rl=10000, ro=20000):
+def calculate_nh3_from_analog(vout, ads_instance, vcc=5.0, rl=10000, ro=20000):
     """
     Convert analog voltage to NH3 PPM.
     ro must be determined from calibration in clean air or known 100ppm NH3.
@@ -34,8 +32,9 @@ if __name__ == "__main__":
     RO = 20000  # replace with your calibrated value
 
     while True:
+        ads = get_ads()
         voltage = fetch_ammonia_from_analog()
-        ppm, rs, ratio = calculate_nh3_from_analog(voltage, ro=RO)
+        ppm, rs, ratio = calculate_nh3_from_analog(voltage,ads, ro=RO)
 
         print(f"Voltage: {voltage:.3f} V | Rs: {rs:.1f} Ω | Rs/Ro: {ratio:.3f} | NH3: {ppm:.2f} ppm")
         time.sleep(1.5)

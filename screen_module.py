@@ -9,6 +9,7 @@ import adafruit_ssd1306
 from temp_module import TemperatureModule 
 from ph_module import voltage_to_ph
 from nh3_module import calculate_nh3_from_analog, fetch_ammonia_from_analog
+from ads_instance import get_ads
 
 # ──────────────────────────────────────────────
 # Display Parameters
@@ -37,6 +38,8 @@ font = ImageFont.truetype(os.path.join("resources", "fonts", "PixelOperator.ttf"
 # Temperature module (DS18B20)
 temp_sensor = TemperatureModule()
 
+# ADS instance
+ads = get_ads()
 
 while True:
     # Clear screen
@@ -57,10 +60,10 @@ while True:
     if temperature is None:
         temperature = 0.0
 
-    time.sleep(0.5)
-    ph_value = voltage_to_ph()
-    time.sleep(0.5) # added delay
-    nh3_value, rs, ratio = calculate_nh3_from_analog(fetch_ammonia_from_analog())
+    time.sleep(1)
+    ph_value = voltage_to_ph(ads)
+    time.sleep(1) # added delay
+    nh3_value, rs, ratio = calculate_nh3_from_analog(fetch_ammonia_from_analog(), ads)
 
     # Display sections
     draw.text((0, 16), f"NH3: {nh3_value:.2f} | Rs{rs:.2f}", font=font, fill=255)

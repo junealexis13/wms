@@ -5,16 +5,13 @@ import math
 from adafruit_ads1x15 import ADS1115, ads1x15, AnalogIn
 from tqdm import tqdm
 
-def fetch_ph_from_analog():
+def fetch_ph_from_analog(ads_instance):
     """Reads analog voltage from PH-4502C via ADS1115."""
-    i2c = board.I2C()
-    ads = ADS1115(i2c)
-    ads.gain = 1  # Gain = 1 => ±4.096V range
-    chan = AnalogIn(ads, ads1x15.Pin.A0)
+    chan = AnalogIn(ads_instance, ads1x15.Pin.A0)
     return chan.voltage
 
-def voltage_to_ph():
-    vout = fetch_ph_from_analog()
+def voltage_to_ph(ads_instance):
+    vout = fetch_ph_from_analog(ads_instance)
 
     # Calibrated voltages at known pH values
     V_acid = 3.8872  # pH 4
