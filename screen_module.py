@@ -68,7 +68,7 @@ while True:
     nh3_value, rs, ratio = calculate_nh3_from_analog(fetch_ammonia_from_analog())
 
     # Display sections
-    draw.text((0, 16), f"NH3: {nh3_value:.2f} | Sensor Rs{rs:.2f}", font=font, fill=255)
+    draw.text((0, 16), f"NH3: {nh3_value:.2f} | Rs{rs:.2f}", font=font, fill=255)
     draw.text((0, 30), f"Temp: {temperature:.2f} °C", font=font, fill=255)
     draw.text((0, 44), f"pH:   {ph_value:.2f}", font=font, fill=255)
 
