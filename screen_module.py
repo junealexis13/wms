@@ -3,9 +3,11 @@ import board
 import busio
 import os
 import subprocess
+import datetime
 from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1306
-from temp_module import TemperatureModule  # import your DS18B20 reader class
+from temp_module import TemperatureModule 
+from ph_module import voltage_to_ph
 from nh3_module import calculate_nh3_from_analog, fetch_ammonia_from_analog
 
 # ──────────────────────────────────────────────
@@ -35,15 +37,6 @@ font = ImageFont.truetype(os.path.join("resources", "fonts", "PixelOperator.ttf"
 # Temperature module (DS18B20)
 temp_sensor = TemperatureModule()
 
-# ──────────────────────────────────────────────
-# Example functions for pH and NH3 placeholders
-# Replace these later with your Arduino serial reads
-# ──────────────────────────────────────────────
-def read_ph():
-    # Placeholder — replace with actual pH sensor read
-    return 7.25
-
-# ──────────────────────────────────────────────
 
 while True:
     # Clear screen
@@ -64,7 +57,7 @@ while True:
     if temperature is None:
         temperature = 0.0
 
-    ph_value = read_ph()
+    ph_value = voltage_to_ph()
     nh3_value, rs, ratio = calculate_nh3_from_analog(fetch_ammonia_from_analog())
 
     # Display sections
@@ -77,4 +70,9 @@ while True:
     oled.image(image)
     oled.show()
 
+    print(f"[{datetime.datetime.now()}] pH {ph_value:.2f} | NH3 {nh3_value:.2f} ppm | Temp {temperature:.2f} °C")
+
+    with open('logging.log', 'a') as rd:
+        rd.write(f"[{datetime.datetime.now()}] pH {ph_value:.2f} | NH3 {nh3_value:.2f} ppm | Temp {temperature:.2f} °C")
+        rd.close()
     time.sleep(LOOPTIME)
