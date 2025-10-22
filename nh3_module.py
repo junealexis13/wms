@@ -9,20 +9,26 @@ def fetch_ammonia_from_analog(ads_instance):
     chan = AnalogIn(ads_instance, ads1x15.Pin.A1)
     return chan.voltage
 
-def calculate_nh3_from_analog(vout, ads_instance, vcc=5.0, rl=10000, ro=20000):
+def calculate_nh3_from_analog(ads_instance, vcc=5.0, rl=10000, ro=20000):
     """
     Convert analog voltage to NH3 PPM.
     ro must be determined from calibration in clean air or known 100ppm NH3.
     """
+    vout = fetch_ammonia_from_analog(ads_instance)
     if vout <= 0:
         return 0, 0, 0
+    
+    if vout >= vcc * 0.99:  # Allow 1% tolerance
+        print(f"Warning: Vout ({vout:.3f}V) near Vcc ({vcc}V) - sensor may be saturated")
+        return 0.0, float('inf'), float('inf')
+
 
     rs = rl * (vcc - vout) / vout
     ratio = rs / ro
 
     # MQ137 ammonia calibration curve constants
     a = -1.67
-    b = 1.47
+    b = 1.3
     ppm = 10 ** (a * math.log10(ratio) + b)
 
     return ppm, rs, ratio

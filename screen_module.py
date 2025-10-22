@@ -63,7 +63,7 @@ while True:
     time.sleep(1)
     ph_value = voltage_to_ph(ads)
     time.sleep(1) # added delay
-    nh3_value, rs, ratio = calculate_nh3_from_analog(fetch_ammonia_from_analog(), ads)
+    nh3_value, rs, ratio = calculate_nh3_from_analog(ads)
 
     # Display sections
     draw.text((0, 16), f"NH3: {nh3_value:.2f} | Rs{rs:.2f}", font=font, fill=255)
