@@ -8,7 +8,7 @@ def fetch_ammonia_from_analog():
     i2c = board.I2C()
     ads = ADS1115(i2c)
     ads.gain = 1  # Gain = 1 => ±4.096V range
-    chan = AnalogIn(ads, ads1x15.Pin.A0)
+    chan = AnalogIn(ads, ads1x15.Pin.A1)
     return chan.voltage
 
 def calculate_nh3_from_analog(vout, vcc=5.0, rl=10000, ro=20000):
