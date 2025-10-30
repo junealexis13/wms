@@ -26,7 +26,8 @@ def calculate_nh3_from_analog(ads_instance, vcc=5.0, rl=10000, ro=20000):
     rs = rl * (vcc - vout) / vout
     ratio = rs / ro
 
-    # MQ137 ammonia calibration curve constants
+    # MQ137 ammonia calibration curve constants // this is from a calibration
+    # report done with the same sensor
     a = -1.67
     b = 1.3
     ppm = 10 ** (a * math.log10(ratio) + b)
@@ -34,7 +35,7 @@ def calculate_nh3_from_analog(ads_instance, vcc=5.0, rl=10000, ro=20000):
     return ppm, rs, ratio
 
 if __name__ == "__main__":
-    # 🔧 Adjust this after calibration
+    # if internal calib is done// adjust proprietary values for this after calibration
     RO = 20000  # replace with your calibrated value
 
     while True:
